@@ -13,26 +13,17 @@ parser.add_argument( '-a', '--ami', nargs='?', default=AMI, const=AMI)
 parser.add_argument( '-i', '--instance_type', nargs='?', default=INSTANCE_TYPE, const=INSTANCE_TYPE)
 parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAME)
 
-parseargs = vars(parser.parse_args())
+args = vars(parser.parse_args())
 
-region = parseargs.get('region')
-instance_type = parseargs.get('instance_type')
-ami = parseargs.get('ami')
-keyname = parseargs.get('keyname')
-
-for a in parseargs:
-    print(parseargs.get(a))
-
-if parseargs.get('region'):
-    print( 'Region: ', parseargs.get('region'))
-    
+for a in args:
+    print(a, args[a])
 
 #del_instance = sys.argv[1]
 
-def delete_aspot():
+def delete_spot():
 
     #ec2 = boto3.resource( 'ec2', region_name=REGION)
-    client = boto3.client( 'ec2', region_name=region)
+    client = boto3.client( 'ec2', region_name=args['region'])
 
     print( 'Getting active spot instance requests...')
 
@@ -94,21 +85,17 @@ def delete_aspot():
         print('\nNo active spot requests found')
         exit(0)
 
-def create_spot( instance_type, ami, region) :
+def create_spot(instance_type, ami, region):
     
     import boto3
     import time
 
-    if argv.length < 2 :
-        instance_type = INSTANCE_TYPE
-        region = REGION
-        
     ec2 = boto3.resource('ec2', region_name=region)
 
     instance = ec2.create_instances(
-            ImageId = AMI,
-            InstanceType = INSTANCE_TYPE,
-            KeyName= KEYNAME,
+            ImageId = ami,
+            InstanceType = instance_type,
+            KeyName= keyname,
             MinCount = 1,
             MaxCount = 1,
             InstanceMarketOptions = {
@@ -118,10 +105,9 @@ def create_spot( instance_type, ami, region) :
                     'InstanceInterruptionBehavior' : 'terminate'
                 }
             }
-
             )
 
-    instance.wait_until_running()
+    #instance.wait_until_running()
 
     print( instance['InstanceId']) 
 
