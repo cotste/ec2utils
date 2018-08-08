@@ -15,8 +15,8 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 
 args = vars(parser.parse_args())
 
-for a in args:
-    print(a, args[a])
+#for a in args:
+#    print(a, args[a])
 
 #del_instance = sys.argv[1]
 
@@ -105,11 +105,35 @@ def create_spot(instance_type, ami, region):
                     'InstanceInterruptionBehavior' : 'terminate'
                 }
             }
-            )
+    )
 
     #instance.wait_until_running()
 
     print( instance['InstanceId']) 
 
+def list_spots(instance_type, region):
+
+    client = boto3.client( 'ec2', region_name=region)
+
+    print( 'Getting active spot instance requests...')
+
+    requests = client.describe_spot_instance_requests(
+            Filters = [
+                {
+                    'Name' : 'state',
+                    'Values' : [
+                        'active'
+                        ]
+                    }
+                ]
+            )
+                       
+    for req in requests:
+        print( "\nInstanceId: " + request['InstanceId'] 
+                    + "\nState: " + request['State'] 
+                    + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
+                    + '\nRequestID: ' + request['SpotInstanceRequestId'])
+
 #def map_rout53() :
 
+list_spots(args['instance_type'], args['region'])
