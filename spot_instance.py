@@ -111,7 +111,7 @@ def create_spot(instance_type, ami, region):
 
     print( instance['InstanceId']) 
 
-def list_spots(instance_type, region):
+def list_spots():
 
     client = boto3.client( 'ec2', region_name=region)
 
@@ -127,8 +127,9 @@ def list_spots(instance_type, region):
                     }
                 ]
             )
+
                        
-    for req in requests:
+    for request in requests:
         print( "\nInstanceId: " + request['InstanceId'] 
                     + "\nState: " + request['State'] 
                     + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
