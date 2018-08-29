@@ -113,28 +113,41 @@ def create_spot(instance_type, ami, region):
 
 def list_spots():
 
-    client = boto3.client( 'ec2', region_name=region)
+    client = boto3.client( 'ec2', region_name=args['region'])
 
-    print( 'Getting active spot instance requests...')
+    print( 'Getting spot instance requests...')
 
-    requests = client.describe_spot_instance_requests(
-            Filters = [
-                {
-                    'Name' : 'state',
-                    'Values' : [
-                        'active'
-                        ]
-                    }
-                ]
-            )
+    requests = client.describe_spot_instance_requests()
 
                        
-    for request in requests:
-        print( "\nInstanceId: " + request['InstanceId'] 
-                    + "\nState: " + request['State'] 
-                    + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
-                    + '\nRequestID: ' + request['SpotInstanceRequestId'])
+    num_reqs = len(requests['SpotInstanceRequests'])
 
-#def map_rout53() :
+    print( 'There are currently ' + str(num_reqs ) + ' spot instance requests active')
 
-list_spots(args['instance_type'], args['region'])
+    req_num = 0
+    if num_reqs > 0:
+        for request in requests['SpotInstanceRequests']:
+            print('\n', 30 * '-', request['InstanceId'], 30 * '-')
+            print( '\nInstanceId: ' + request['InstanceId'] 
+                        + '\nState: ' + request['State'] 
+                        + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
+                        + '\nRequestID: ' + request['SpotInstanceRequestId'])
+            print(30 * '-', request['InstanceId'], 30 * '-')
+
+def map_zones():
+
+    r53client = boto3.client('route53')
+
+    hzones = r53client.list_hosted_zones()
+
+    #print(hzones)
+
+    for hzone in hzones['HostedZones']:
+        print('\n', 30 * '-', hzone['Id'], 30 * '-')
+        print('Name: ', hzone['Name']
+                + '\nResource Record Set Count: ', str(hzone['ResourceRecordSetCount'])
+                + '\nPrivate Zone: ', hzone['Config']['PrivateZone'])
+        print(30 * '-', hzone['Id'], 30 * '-')
+list_spots()
+map_zones()
+
