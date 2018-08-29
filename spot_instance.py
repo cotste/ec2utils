@@ -6,6 +6,7 @@ AMI = 'ami-f2d3638a'
 INSTANCE_TYPE = 't2.micro'
 REGION = 'us-west-2'
 KEYNAME = 'cotste-us-west-2'
+COTSTE_ZONEID = 'Z35YLRGJE15KJD'
 
 parser = argparse.ArgumentParser()
 parser.add_argument( '-r', '--region', nargs='?', default=REGION, const=REGION)
@@ -95,7 +96,7 @@ def create_spot(instance_type, ami, region):
     instance = ec2.create_instances(
             ImageId = ami,
             InstanceType = instance_type,
-            KeyName= keyname,
+            KeyName = keyname,
             MinCount = 1,
             MaxCount = 1,
             InstanceMarketOptions = {
@@ -110,6 +111,8 @@ def create_spot(instance_type, ami, region):
     #instance.wait_until_running()
 
     print( instance['InstanceId']) 
+
+    return( instance)
 
 def list_spots():
 
@@ -134,11 +137,11 @@ def list_spots():
                         + '\nRequestID: ' + request['SpotInstanceRequestId'])
             print(30 * '-', request['InstanceId'], 30 * '-')
 
-def map_zones():
+def list_zones():
 
-    r53client = boto3.client('route53')
+    client = boto3.client('route53')
 
-    hzones = r53client.list_hosted_zones()
+    hzones = client.list_hosted_zones()
 
     #print(hzones)
 
@@ -148,6 +151,33 @@ def map_zones():
                 + '\nResource Record Set Count: ', str(hzone['ResourceRecordSetCount'])
                 + '\nPrivate Zone: ', hzone['Config']['PrivateZone'])
         print(30 * '-', hzone['Id'], 30 * '-')
+
+def map_zones(source, target):
+
+    client = boto3.client('route53')
+
+    response = client.change_resource_record_sets(
+            HostedZoneID = COTSTE_ZONEID,
+            ChangeBatch = {
+                'Comment': 'Change %s to %s' % (source, target),
+                'Changes': [
+                    {
+                        'Action': 'UPSERT',
+                        'ResourceRecordSet': {
+                            'Name': source,
+                            'Type': 'A',
+                            'TTL': 300,
+                            'ResourceRecords': [{'Value': target}]
+                            }
+                        }]
+                    }
+            )
+
+
+
+
+
+
 list_spots()
-map_zones()
+list_zones()
 
