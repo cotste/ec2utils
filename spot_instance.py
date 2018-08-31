@@ -1,6 +1,10 @@
 import boto3
 import sys
 import argparse
+import os
+
+os.environ['HTTP_PROXY'] = 'http://nss.chq.ei:8080'
+os.environ['HTTPS_PROXY'] = 'http://nss.chq.ei:8080'
 
 AMI = 'ami-f2d3638a'
 INSTANCE_TYPE = 't2.micro'
@@ -16,10 +20,6 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 
 args = vars(parser.parse_args())
 
-#for a in args:
-#    print(a, args[a])
-
-#del_instance = sys.argv[1]
 
 def delete_spot():
 
@@ -38,20 +38,20 @@ def delete_spot():
                     }
                 ]
             )
-                       
+
     num_reqs = len(response['SpotInstanceRequests'])
 
     print( 'There are currently ' + str(num_reqs ) + ' spot instance requests active')
 
     if num_reqs > 0 :
-        
+
         req_num = 0
         for request in response['SpotInstanceRequests']:
             reqID = request['SpotInstanceRequestId']
             instID = request['InstanceId']
             print( 'This will cancel the following spot instance request and terminate the instance')
-            print( "\nInstanceId: " + request['InstanceId'] 
-                    + "\nState: " + request['State'] 
+            print( "\nInstanceId: " + request['InstanceId']
+                    + "\nState: " + request['State']
                     + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
                     + '\nRequestID: ' + request['SpotInstanceRequestId'])
 
@@ -64,21 +64,21 @@ def delete_spot():
                          instID
                          ]
                         )
-                
-                print( 'Cancelling spot request with RequestId: ' + reqID ) 
+
+                print( 'Cancelling spot request with RequestId: ' + reqID )
                 reqResponse = client.cancel_spot_instance_requests(
                     SpotInstanceRequestIds = [
                         reqID
                         ]
                     )
 
-                print( 'Response: ' 
+                print( 'Response: '
                         + '\n\tRequest ID: ' + reqResponse['CancelledSpotInstanceRequests'][req_num]['SpotInstanceRequestId']
                         + '\n\tState: ' + reqResponse['CancelledSpotInstanceRequests'][req_num]['State'])
-           
+
             elif cont.lower() == 'n':
                 print( 'Cancelling, no action taken.')
-            
+
             else :
                 print( 'Invalid response')
 
@@ -86,8 +86,8 @@ def delete_spot():
         print('\nNo active spot requests found')
         exit(0)
 
-def create_spot(instance_type, ami, region):
-    
+def create_spot(instance_type, ami, region, keyname):
+
     import boto3
     import time
 
@@ -110,19 +110,19 @@ def create_spot(instance_type, ami, region):
 
     #instance.wait_until_running()
 
-    print( instance['InstanceId']) 
+#    print( instance['InstanceId'])
 
     return( instance)
 
-def list_spots():
+def list_spots(region):
 
-    client = boto3.client( 'ec2', region_name=args['region'])
+    client = boto3.client( 'ec2', region_name=region)
 
     print( 'Getting spot instance requests...')
 
     requests = client.describe_spot_instance_requests()
 
-                       
+
     num_reqs = len(requests['SpotInstanceRequests'])
 
     print( 'There are currently ' + str(num_reqs ) + ' spot instance requests active')
@@ -131,11 +131,13 @@ def list_spots():
     if num_reqs > 0:
         for request in requests['SpotInstanceRequests']:
             print('\n', 30 * '-', request['InstanceId'], 30 * '-')
-            print( '\nInstanceId: ' + request['InstanceId'] 
-                        + '\nState: ' + request['State'] 
+            print( '\nInstanceId: ' + request['InstanceId']
+                        + '\nState: ' + request['State']
                         + '\nDate: ' + request['CreateTime'].strftime('%d-%B')
                         + '\nRequestID: ' + request['SpotInstanceRequestId'])
             print(30 * '-', request['InstanceId'], 30 * '-')
+    
+    return(requests)
 
 def list_zones():
 
@@ -175,9 +177,6 @@ def map_zones(source, target):
 
 
 
-
-
-
-list_spots()
-list_zones()
+#list_spots(args['region'])
+#list_zones()
 
