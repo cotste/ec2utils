@@ -3,9 +3,6 @@ import sys
 import argparse
 import os
 
-os.environ['HTTP_PROXY'] = 'http://nss.chq.ei:8080'
-os.environ['HTTPS_PROXY'] = 'http://nss.chq.ei:8080'
-
 AMI = 'ami-f2d3638a'
 INSTANCE_TYPE = 't2.micro'
 REGION = 'us-west-2'
