@@ -20,7 +20,15 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 
 args = vars(parser.parse_args())
 
-instance = si.create_spot(args['instance_type'], args['ami'], args['region'], args['keyname'])
+init_script = """#!/bin/bash
+    sudo yum -y update
+    sudo yum -y install java-1.8.0-openjdk tmux htop
+    sudo yum -y remove java-1.7.0-openjdk
+    sudo mkdir /srv/minecraft
+    sudo chown ec2-user:ec2-user /srv/minecraft"""
+    
+
+instance = si.create_spot(args['instance_type'], args['ami'], args['region'], args['keyname'], init_script)
 
 #print('Instance created, instanceID: %s', mc_instance['InstanceId'])
 

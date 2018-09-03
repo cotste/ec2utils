@@ -83,7 +83,7 @@ def delete_spot():
         print('\nNo active spot requests found')
         exit(0)
 
-def create_spot(instance_type, ami, region, keyname):
+def create_spot(instance_type, ami, region, keyname, init_script):
 
     import boto3
     import time
@@ -96,6 +96,7 @@ def create_spot(instance_type, ami, region, keyname):
             KeyName = keyname,
             MinCount = 1,
             MaxCount = 1,
+            UserData = init_script,
             InstanceMarketOptions = {
                 'MarketType' : 'spot',
                 'SpotOptions' : {
