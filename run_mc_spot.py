@@ -6,7 +6,8 @@ import argparse
 
 import spot_instance as si
 
-AMI = 'ami-f2d3638a'
+AMI = 'ami-6cd6f714'
+#AMI = 'ami-f2d3638a'
 INSTANCE_TYPE = 't3.large'
 REGION = 'us-west-2'
 KEYNAME = 'cotste-us-west-2'
@@ -21,21 +22,29 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 args = vars(parser.parse_args())
 
 init_script = """#!/bin/bash
-    sudo yum -y update
-    sudo yum -y install java-1.8.0-openjdk tmux htop
-    sudo yum -y remove java-1.7.0-openjdk
-    sudo mkdir /srv/minecraft
-    sudo chown ec2-user:ec2-user /srv/minecraft"""
-    
+    sudo /usr/bin/yum -y update
+    sudo /usr/bin/yum -y install java-1.8.0-openjdk tmux htop
+    sudo /usr/bin/yum -y remove java-1.7.0-openjdk
+    sudo /usr/bin/mkdir -p /srv/minecraft/zucoland-survival
+    sudo /sbin/groupadd minecraft
+    sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
+    echo 'minecraft:M!necr@ftPW!' | sudo chpasswd
+    /usr/bin/aws s3 sync s3://minecrafts3.cotste.com/zucoland-survival /srv/minecraft/zucoland-survival/
+    sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
+    sudo /bin/chmod 664 /etc/systemd/system/minecraft@.service
+    sudo /bin/chown -R minecraft:minecraft /srv/minecraft
+    sudo /usr/bin/systemctl enable minecraft@zucoland-survival
+    sudo /usr/bin/systemctl start minecraft@zucoland-survival"""
 
 instance = si.create_spot(args['instance_type'], args['ami'], args['region'], args['keyname'], init_script)
 
 #print('Instance created, instanceID: %s', mc_instance['InstanceId'])
 
 
-mc_instance = instance[0]
+mc_instance = si.get_instance(instance[0].instance_id)
 
-time.sleep(10)
+mc_instance.wait_until_running()
+mc_instance.load()
 
 print('\n\nPublic IP: {0}\nPublic DNS: {1}\nHypervisor: {2}\nCPU Options: {3}\nInstance Type: {4}\n'.format(
     mc_instance.public_ip_address,
@@ -43,4 +52,8 @@ print('\n\nPublic IP: {0}\nPublic DNS: {1}\nHypervisor: {2}\nCPU Options: {3}\nI
     mc_instance.hypervisor,
     mc_instance.cpu_options,
     mc_instance.instance_type))
+
+si.map_zones('zucoland.cotste.com', mc_instance.public_ip_address)
+
+
 

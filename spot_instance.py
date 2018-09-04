@@ -3,7 +3,8 @@ import sys
 import argparse
 import os
 
-AMI = 'ami-f2d3638a'
+AMI = 'ami-6cd6f714'
+#AMI = 'ami-f2d3638a'
 INSTANCE_TYPE = 't2.micro'
 REGION = 'us-west-2'
 KEYNAME = 'cotste-us-west-2'
@@ -17,6 +18,13 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 
 args = vars(parser.parse_args())
 
+def get_instance(instance_id):
+    
+    ec2 = boto3.resource('ec2', region_name=args['region'])
+    
+    instance = ec2.Instance(instance_id)
+
+    return(instance)
 
 def delete_spot():
 
@@ -103,7 +111,10 @@ def create_spot(instance_type, ami, region, keyname, init_script):
                     'SpotInstanceType' : 'one-time',
                     'InstanceInterruptionBehavior' : 'terminate'
                 }
-            }
+            },
+            IamInstanceProfile = {
+                'Arn' : 'arn:aws:iam::673721771816:instance-profile/minecrafts3'
+            } 
     )
 
     #instance.wait_until_running()
@@ -157,7 +168,7 @@ def map_zones(source, target):
     client = boto3.client('route53')
 
     response = client.change_resource_record_sets(
-            HostedZoneID = COTSTE_ZONEID,
+            HostedZoneId = COTSTE_ZONEID,
             ChangeBatch = {
                 'Comment': 'Change %s to %s' % (source, target),
                 'Changes': [
