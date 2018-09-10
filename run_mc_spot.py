@@ -25,11 +25,12 @@ init_script = """#!/bin/bash
     sudo /usr/bin/yum -y update
     sudo /usr/bin/yum -y install java-1.8.0-openjdk tmux htop
     sudo /usr/bin/yum -y remove java-1.7.0-openjdk
-    sudo /usr/bin/mkdir -p /srv/minecraft/zucoland-survival
+    sudo /usr/bin/mkdir -p /srv/minecraft/
     sudo /sbin/groupadd minecraft
     sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
     echo 'minecraft:M!necr@ftPW!' | sudo chpasswd
-    /usr/bin/aws s3 sync s3://minecrafts3.cotste.com/zucoland-survival /srv/minecraft/zucoland-survival/
+    /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.gz /srv/minecraft/
+    sudo /usr/bin/tar -xzvf /srv/minecraft/zucoland-survival.tar.gz -C /srv/minecraft/
     sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
     sudo /bin/chmod 664 /etc/systemd/system/minecraft@.service
     sudo /bin/chown -R minecraft:minecraft /srv/minecraft
