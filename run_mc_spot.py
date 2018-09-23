@@ -29,8 +29,8 @@ init_script = """#!/bin/bash
     sudo /sbin/groupadd minecraft
     sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
     echo 'minecraft:M!necr@ftPW!' | sudo chpasswd
-    /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.gz /srv/minecraft/
-    sudo /usr/bin/tar -xzvf /srv/minecraft/zucoland-survival.tar.gz -C /srv/minecraft/
+    /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.xz /srv/minecraft/
+    sudo /usr/bin/tar -xJvf /srv/minecraft/zucoland-survival.tar.xz -C /srv/minecraft/
     sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
     sudo /bin/chmod 664 /etc/systemd/system/minecraft@.service
     sudo /bin/chown -R minecraft:minecraft /srv/minecraft
