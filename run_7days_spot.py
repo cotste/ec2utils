@@ -21,21 +21,25 @@ parser.add_argument( '-k', '--keyname', nargs='?', default=KEYNAME, const=KEYNAM
 
 args = vars(parser.parse_args())
 
+
+#init_script = """#!/bin/bash
+#    sudo /usr/bin/yum -y update
+#    sudo /usr/bin/yum -y install java-1.8.0-openjdk tmux htop
+#    sudo /usr/bin/yum -y remove java-1.7.0-openjdk
+#    sudo /usr/bin/mkdir -p /srv/minecraft/
+#    sudo /sbin/groupadd minecraft
+#    sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
+#    echo 'minecraft:M!necr@ftPW!' | sudo chpasswd
+#    /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.xz /srv/minecraft/
+#    sudo /usr/bin/tar -xJvf /srv/minecraft/zucoland-survival.tar.xz -C /srv/minecraft/
+#    sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
+#    sudo /bin/chmod 664 /etc/systemd/system/minecraft@.service
+#    sudo /bin/chown -R minecraft:minecraft /srv/minecraft
+#    sudo /usr/bin/systemctl enable minecraft@zucoland-survival
+#    sudo /usr/bin/systemctl start minecraft@zucoland-survival"""
+
 init_script = """#!/bin/bash
-    sudo /usr/bin/yum -y update
-    sudo /usr/bin/yum -y install java-1.8.0-openjdk tmux htop
-    sudo /usr/bin/yum -y remove java-1.7.0-openjdk
-    sudo /usr/bin/mkdir -p /srv/minecraft/
-    sudo /sbin/groupadd minecraft
-    sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
-    echo 'minecraft:'2options' | sudo chpasswd
-    /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.xz /srv/minecraft/
-    sudo /usr/bin/tar -xJvf /srv/minecraft/zucoland-survival.tar.xz -C /srv/minecraft/
-    sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
-    sudo /bin/chmod 664 /etc/systemd/system/minecraft@.service
-    sudo /bin/chown -R minecraft:minecraft /srv/minecraft
-    sudo /usr/bin/systemctl enable minecraft@zucoland-survival
-    sudo /usr/bin/systemctl start minecraft@zucoland-survival"""
+    sudo /usr/bin/yum -y update"""
 
 instance = si.create_spot(args['instance_type'], args['ami'], args['region'], args['keyname'], init_script)
 
@@ -54,7 +58,7 @@ print('\n\nPublic IP: {0}\nPublic DNS: {1}\nHypervisor: {2}\nCPU Options: {3}\nI
     mc_instance.cpu_options,
     mc_instance.instance_type))
 
-si.map_zones('zucoland.cotste.com', mc_instance.public_ip_address)
+si.map_zones('zucoapoc.cotste.com', mc_instance.public_ip_address)
 
 
 
