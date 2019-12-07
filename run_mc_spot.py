@@ -6,8 +6,8 @@ import argparse
 
 import spot_instance as si
 
-AMI = 'ami-6cd6f714'
-#AMI = 'ami-f2d3638a'
+#AMI = 'ami-6cd6f714'
+AMI = 'ami-01bbe152bf19d0289'
 INSTANCE_TYPE = 't3.large'
 REGION = 'us-west-2'
 KEYNAME = 'cotste-us-west-2'
@@ -25,10 +25,9 @@ init_script = """#!/bin/bash
     sudo /usr/bin/yum -y update
     sudo /usr/bin/yum -y install java-1.8.0-openjdk tmux htop
     sudo /usr/bin/yum -y remove java-1.7.0-openjdk
-    sudo /usr/bin/mkdir -p /srv/minecraft/
     sudo /sbin/groupadd minecraft
     sudo /sbin/useradd -s /bin/bash -c "Minecraft Server User" --system -d /srv/minecraft -g minecraft minecraft
-    echo 'minecraft:M!necr@ftPW!' | sudo chpasswd
+    echo 'minecraft:2options' | sudo chpasswd
     /usr/bin/aws s3 cp s3://minecrafts3.cotste.com/zucoland-survival.tar.xz /srv/minecraft/
     sudo /usr/bin/tar -xJvf /srv/minecraft/zucoland-survival.tar.xz -C /srv/minecraft/
     sudo /usr/bin/cp /srv/minecraft/zucoland-survival/minecraft@.service /etc/systemd/system/
